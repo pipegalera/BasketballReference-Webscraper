@@ -6,3 +6,6 @@ A clean and easy to use Basketballreference.com webscraper deployed with Streaml
 Live:
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/pipegalera/basketballreference-webscraper/main)
+
+![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)
+
