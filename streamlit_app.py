@@ -37,7 +37,7 @@ for year in list_years:
         seasons[year] = year
 
 # Sidebar
-st.sidebar.header('How this works?')
+st.sidebar.header('How does it work?')
 st.sidebar.markdown("""
              1. 👇 Select the **season** and type of **statistics** (*total stats*, *per game*, *advanced stats*...)
 
