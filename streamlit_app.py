@@ -30,6 +30,8 @@ st.markdown("""
 
 st.markdown("---")
 
+########################### Seasons ###########################
+
 
 seasons = {}
 list_years = list(reversed(range(1950,2022)))
@@ -50,7 +52,7 @@ selected_seasons = st.multiselect('NBA Seasons:',
 
 ########################### Players ###########################
 
-st.subheader('2. Choose the king of Player statistics')
+st.subheader('2. Choose the kind of Player statistics')
 
 # Options
 players_stats = {'Total stats': 'totals',
