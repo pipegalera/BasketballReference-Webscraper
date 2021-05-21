@@ -10,17 +10,13 @@ import pandas as pd
 import numpy as np
 import base64
 from io import BytesIO
+import time
 
-st.markdown(" # :basketball: NBA Data Scraper :basketball:")
+st.markdown(" # :basketball: NBA Players stats Scraper :basketball:")
 st.subheader('Web App by [Pipe Galera](https://www.pipegalera.com/)')
 
-col1, col2, col3 = st.beta_columns(3)
-with col2:
-    st.markdown(' ')
-    st.markdown(' ')
-    button = st.button("Show me the data!")
 
-# Sidebar Options
+# Options
 stats_type = {'Total stats': 'totals',
               'Stats per game': 'per_game',
               'Stats per 36 minutes': 'per_minute',
@@ -36,29 +32,55 @@ for year in list_years:
     if year >= 2021:
         seasons[year] = year
 
+seasons_list = list(seasons.keys())
+
 # Sidebar
-st.sidebar.header('How does it work?')
-st.sidebar.markdown("""
-             1. 👇 Select the **season** and type of **statistics** (*total stats*, *per game*, *advanced stats*...)
+st.header('How does the app works?')
+st.markdown("""
+             1. 👇 Select the **seasons** and type of **statistics** (*total stats*, *per game*, *advanced stats*...)
 
              2. 🖱️ Click **Show me the data!**
 
-             3. ⛹️‍♀️ Download clean basketball data in Excel or .csv format.
+             3. ⛹️‍♀️ Download clean player data in Excel or .csv format.
 """ )
 
-selected_year = st.sidebar.selectbox('Season', list(seasons.keys()))
-selected_type = st.sidebar.selectbox('Kind of data', list(stats_type.keys()))
+st.markdown("---")
+
+
+selected_seasons = st.multiselect('NBA Seasons:',
+                                       seasons_list,
+                                       seasons_list[:22])
+selected_type = st.selectbox('Kind of statistics:',
+                                     list(stats_type.keys()))
 
 
 @st.cache
-def load_data(selected_year, selected_type):
+def load_data(selected_seasons, selected_type):
     # User selections
-    year = seasons.get(selected_year)
+    list_seasons = []
+    for i in selected_seasons: list_seasons.append(seasons.get(i))
     type = stats_type.get(selected_type)
 
-    # Scrape data
-    url = "https://www.basketball-reference.com/leagues/NBA_{year}_{type}.html".format(year=year, type=type)
-    df = pd.read_html(url, header = 0)[0]
+
+    # Get URLs for the selected seasons and statistics type
+    url_list = []
+    for season in list_seasons:
+        url = "https://www.basketball-reference.com/leagues/NBA_{season}_{type}.html".format(season=season, type=type)
+        url_list.append(url)
+
+
+    # Screape data
+    df = pd.DataFrame()
+    for url in url_list:
+        part_df = pd.read_html(url, header = 0)[0]
+
+        # Indicate year
+        year = [d for d in url if d.isdigit()]
+        year = ''.join(year)
+        part_df["Season"] = year
+
+        # Append all the years
+        df = df.append(part_df, ignore_index = True)
 
     # Drop duplicates and empty columns
     df = df.drop(df[df['Age'] == 'Age'].index)
@@ -70,6 +92,16 @@ def load_data(selected_year, selected_type):
     df = df.apply(pd.to_numeric, errors = 'ignore')
 
     return df
+
+col1, col2, col3 = st.beta_columns(3)
+with col2:
+    st.markdown(' ')
+    st.markdown(' ')
+    button = st.button("Show me the data!")
+
+
+df = load_data(selected_seasons[:2], selected_type)
+
 
 # To donwload the data
 def to_excel(df):
@@ -92,15 +124,16 @@ def link_csv(df):
     out: href string
     """
     csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  
+    b64 = base64.b64encode(csv.encode()).decode()
     return f'<a href="data:file/csv;base64,{b64}" download="data.csv">Download CSV file</a>'
 
 if button:
-    df = load_data(selected_year, selected_type)
-    df_header = 'Player stats for the ' + str(selected_year) + ' NBA season'
+    df = load_data(selected_seasons, selected_type)
+    df_header = 'Player stats for the ' + str(len(selected_seasons)) + ' selected seasons'
     st.header(df_header)
-    st.write('Number of players: ' + str(len(df.Player.unique())))
-    st.write(df.set_index('Player'))
+    st.write('Number of rows in the data: ' + str(df.shape[0]) + ', that correspond to stats of ' + str(len(df.Player.unique())) + ' different Players')
+    st.write(df)
+    st.write('**Note**: a Player name followed by ***** indicates member of the Hall of Fame.')
     st.markdown("**Source:** Real-time scraped from [Basketball-reference.com](https://www.basketball-reference.com/).")
     st.markdown("---")
     st.header('**Download the data** in the most convinient format for you: ')
