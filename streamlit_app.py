@@ -21,11 +21,11 @@ st.header('How does the app works?')
 st.markdown("""
              1. 👇 Select the **NBA seasons**.
 
-             2. ⛹️‍♀️ You can choose among several **Player statistics** or **Team statistics**.
+             2. ⛹️‍♀️ Choose among several **Player statistics** or **Team statistics**.
 
              3. 🖱️ Click **Show me the data!**
 
-             4. 📂 Once you cllick, you can download clean player data in Excel or .csv format.
+             4. 📂 Download clean player data in Excel or .csv format.
 """ )
 
 st.markdown("---")
