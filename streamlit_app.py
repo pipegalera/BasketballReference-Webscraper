@@ -86,7 +86,7 @@ def loading_players_data(selected_seasons, selected_type):
         # Indicate year
         season = [d for d in url if d.isdigit()]
         season = ''.join(season)
-        part_df["Season"] = str(int(season)-1) + "/" + str(int(season))
+        part_df["Season"] = str(int(season)-1) + "/" + str(int(season))[2:]
 
         # Append all the years
         df = df.append(part_df, ignore_index = True)
