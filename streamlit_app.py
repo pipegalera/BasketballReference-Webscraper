@@ -36,11 +36,8 @@ st.markdown("---")
 seasons = {}
 list_years = list(reversed(range(1950,2022)))
 for year in list_years:
-    if year < 2021:
         key = str(year-1) + '-' + str(year)
         seasons[key] = year
-    if year >= 2021:
-        seasons[year] = year
 
 seasons_list = list(seasons.keys())
 
@@ -87,9 +84,9 @@ def loading_players_data(selected_seasons, selected_type):
         part_df = pd.read_html(url, header = 0)[0]
 
         # Indicate year
-        year = [d for d in url if d.isdigit()]
-        year = ''.join(year)
-        part_df["Season"] = year
+        season = [d for d in url if d.isdigit()]
+        season = ''.join(season)
+        part_df["Season"] = str(int(season)-1) + "/" + str(int(season))
 
         # Append all the years
         df = df.append(part_df, ignore_index = True)
@@ -221,3 +218,4 @@ if button_teams:
 
 else:
     pass
+
