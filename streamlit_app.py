@@ -1,22 +1,13 @@
-# @Author: pipegalera
-# @Date:   2020-10-04T21:40:56+02:00
-# @Last modified by:   pipegalera
-# @Last modified time: 2020-10-20T12:42:39+02:00
-
-
-
 import streamlit as st
 import pandas as pd
-import numpy as np
-import base64
-from io import BytesIO
-import time
+from functions_app import *
 
-########################### Header ######################
-
-st.markdown(" # :basketball: NBA stats Scraper :basketball:")
+st.markdown(" # :basketball: NBA Data Scraper :basketball:")
 st.subheader('Web App by [Pipe Galera](https://www.pipegalera.com/)')
 
+<<<<<<< HEAD
+
+=======
 st.header('How does the app works?')
 st.markdown("""
              1. 👇 Select the **NBA seasons**.
@@ -87,73 +78,53 @@ def loading_players_data(selected_seasons, selected_type):
         season = [d for d in url if d.isdigit()]
         season = ''.join(season)
         part_df["Season"] = str(int(season)-1) + "/" + str(int(season))[2:]
+>>>>>>> c3f59916374434a0e517f8dfcb3b2e1fb4ea6111
 
-        # Append all the years
-        df = df.append(part_df, ignore_index = True)
+########################### Lists and Dictionaries ###########################
 
-    # Drop duplicates and empty columns
-    df = df.drop(df[df['Age'] == 'Age'].index)
-    df = df.drop(columns = ['Rk'])
-    df = df.dropna(how = 'all', axis = 'columns')
+seasons_dict, seasons_list =  get_seasons_dict(1950, 2022)
 
-    # Fill nans and turn data into numeric
-    df = df.fillna(0)
-    df = df.apply(pd.to_numeric, errors = 'ignore')
+stats_dict = {'Players total stats': 'totals',
+              'Players stats per game': 'per_game',
+              'Players stats per 36 minutes': 'per_minute',
+              'Players stats per 100 possesions': 'per_poss',
+              'Players adavanced stats': 'advanced',
+              'Players salary (only available from 1990 on)': 'salaries',
+              'Teams statistics': 'teams'}
 
-    return df
+########################### Data Scraper ###############################
 
-col1, col2, col3 = st.beta_columns(3)
-with col2:
-    st.markdown(' ')
-    st.markdown(' ')
-    button_players = st.button("3. Show me the players data!")
+with st.form('Form'):
+    selected_seasons = st.multiselect('NBA Seasons:', seasons_list, seasons_list[:22])
+    selected_stats_type = st.selectbox('Data:', list(stats_dict.keys()))                                  
+    submit = st.form_submit_button(label='Submit')
 
+if submit:
+    if selected_stats_type == 'Teams statistics': 
+        df = loading_teams_data(seasons_dict, selected_seasons)
+        df_header = 'Team stats for the ' + str(len(selected_seasons)) + ' selected seasons'
+    elif selected_stats_type == 'Players salary (only available from 1990 on)': 
+        df = nba_salaries(seasons_dict, selected_seasons)
+        df_header = 'Player stats for the ' + str(len(selected_seasons)) + ' selected seasons'
+    else:
+        df = loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_stats_type)
+        df_header = 'Player stats for the ' + str(len(selected_seasons)) + ' selected seasons'
 
-# To donwload the data
-def to_excel(df):
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name='Sheet1')
-    writer.save()
-    processed_data = output.getvalue()
-    return processed_data
-
-def link_excel(df):
-    """Generates a link allowing the data in a given panda dataframe to be downloaded
-    in:  dataframe
-    out: href string
-    """
-    val = to_excel(df)
-    b64 = base64.b64encode(val)
-
-    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="data.xlsx">Download Excel file</a>'
-
-def link_csv(df):
-    """Generates a link allowing the data in a given panda dataframe to be downloaded
-    in:  dataframe
-    out: href string
-    """
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    return f'<a href="data:file/csv;base64,{b64}" download="data.csv">Download CSV file</a>'
-
-if button_players:
-    df = loading_players_data(selected_seasons, selected_type)
-    df_header = 'Player stats for the ' + str(len(selected_seasons)) + ' selected seasons'
     st.subheader(df_header)
     st.write(df)
-    st.write('**Note**: a Player name followed by ***** indicates member of the Hall of Fame.')
-    st.markdown("**Source:** Real-time scraped from [Basketball-reference.com](https://www.basketball-reference.com/).")
+    st.markdown("**Source:** Real-time scraped from [Basketball-reference.com](https://www.basketball-reference.com/). Salaries data comes from [Hoopshype.com](https://hoopshype.com/salaries/)")
     st.markdown("---")
-    st.subheader('**4. Download the data** in the most convinient format for you: ')
 
-    links1, links2, links3 = st.beta_columns(3)
-    with links2:
+
+    column1, column2, column3 = st.beta_columns(3)
+    with column2:
         st.markdown(link_csv(df), unsafe_allow_html=True)
         st.markdown(link_excel(df), unsafe_allow_html=True)
 
 else:
     pass
+<<<<<<< HEAD
+=======
 
 st.markdown("---")
 
@@ -219,3 +190,4 @@ if button_teams:
 else:
     pass
 
+>>>>>>> c3f59916374434a0e517f8dfcb3b2e1fb4ea6111
