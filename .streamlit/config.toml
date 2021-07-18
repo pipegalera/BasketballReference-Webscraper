@@ -1,11 +1,8 @@
 [theme]
 
 # Primary accent for interactive elements
-primaryColor = '#F6620C'
+primaryColor = "#F6620C"
 
-backgroundColor = “#00172B”
-secondaryBackgroundColor = “#0083B8”
-textColor = “#DCDCDC”
 
 
 # Font family for all text in the app, except code blocks
