@@ -1,6 +1,6 @@
 # BasketballReference-Webscraper
 
-A clean and easy to use Basketballreference.com webscraper deployed with Streamlit.
+A clean and easy to use NBA data webscraper deployed with Streamlit.
 
 ![](./images/preview.png)
 
