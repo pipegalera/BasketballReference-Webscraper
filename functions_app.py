@@ -45,6 +45,32 @@ teams_dict = {
     'WAS': 'Washington Wizards',
     'WSB': 'Washington Bullets'} 
 
+teams_dict_inverted = dict(zip(teams_dict.values(), teams_dict.keys()))
+
+def start_of_the_season_indicator():
+    """
+    If before Oct 19:
+         current ended season
+    If August:
+         next starting season
+    """
+    if (date.today().month < 10) & (date.today().day < 10):
+        return (str(date.today().year - 1) + str("-") + str(date.today().year))
+    else:
+        return (str(date.today().year) + str("-") + str(date.today().year + 1))
+
+def start_of_the_free_agency_indicator():
+    """
+    If before August 4th:
+         salaries current ended season
+    If August 4th on:
+         salaries next starting season
+    """
+    if (date.today().month < 8) & (date.today().day < 4):
+        return (str(date.today().year - 1) + str("-") + str(date.today().year))
+    else:
+        return (str(date.today().year) + str("-") + str(date.today().year + 1))
+
 def get_seasons_dict(from_season, to_season):
         seasons = {}
         list_years = list(reversed(range(from_season, to_season)))
@@ -91,10 +117,14 @@ def loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_st
     df = df.dropna(how = 'all', axis = 'columns')
 
     # Tidy data
-    df = df.fillna(0)
-    df = df.apply(pd.to_numeric, errors = 'ignore')
+    df = df.apply(pd.to_numeric, errors = 'ignore').fillna(0)
     df["Player"] = df["Player"].apply(lambda x: x.replace('*', ''))
+    
+    # Create a column with the full name of the team
+    team_full = df['Tm'].map(teams_dict)
+    df.insert(3, "Team", team_full)
 
+    df = df.sort_values(by = ["Season"], ascending = False)
 
     return df
 
@@ -127,27 +157,15 @@ def loading_teams_data(seasons_dict, selected_seasons):
         # Drop empty columns
         df = df.drop(columns = ['Rk'])
 
-        # Fill nans (eg. Only ORtg or DRtg from 1983 on)
-        df = df.fillna(0)
-        df = df.apply(pd.to_numeric, errors = 'ignore')
+    # Fill nans (eg. Only ORtg or DRtg from 1983 on)
+    df = df.fillna(0)
+    df = df.apply(pd.to_numeric, errors = 'ignore')
 
-        # Create a column with the full name of the team
-        team_name = df['Tm'].map(teams_dict)
-        df.insert(3, "Team", team_name)
+    # Create a column with the abbreviation name of the team
+    team_abv = df['Team'].map(teams_dict_inverted)
+    df.insert(1, "Tm", team_abv)
 
     return df
-
-def start_of_the_season_indicator():
-    """
-    If before Oct 19:
-        salaries current ended season
-    If August:
-        salaries next starting season
-    """
-    if (date.today().month < 10) & (date.today().day < 10):
-        return (str(date.today().year - 1) + str("-") + str(date.today().year))
-    else:
-        return (str(date.today().year) + str("-") + str(date.today().year + 1))
 
 def nba_salaries(seasons_dict, selected_seasons):
     # Store the key of the selected seasons
@@ -158,7 +176,7 @@ def nba_salaries(seasons_dict, selected_seasons):
     # List of URLs
     list_urls = []
     for season in selected_seasons:
-        if season == start_of_the_season_indicator():
+        if season == start_of_the_free_agency_indicator():
             url = 'https://hoopshype.com/salaries/players/'
             list_urls.append(url)
         else:
@@ -191,9 +209,10 @@ def nba_salaries(seasons_dict, selected_seasons):
             df = df.append(salary, ignore_index = True)
 
     # Tidy the dataset
+    df = df.replace(['\$', ','], '', regex=True)
+    df = df.apply(pd.to_numeric, errors = 'ignore').fillna(0)
     df = df.sort_values(by = ["Season", "Salary"], ascending = False)
-    df["Salary"] = df["Salary"].apply(lambda x: x.replace("$", ""))
-    df["Salary"] = df["Salary"].apply(pd.to_numeric, errors = 'ignore')
+    
     
     return df
 
