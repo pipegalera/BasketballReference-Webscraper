@@ -7,7 +7,9 @@ st.subheader('Web App by [Pipe Galera](https://www.pipegalera.com/)')
 
 ########################### Lists and Dictionaries ###########################
 
-seasons_dict, seasons_list =  get_seasons_dict(1950, current_free_agency_indicator()[5:])
+current_season = int(start_of_the_season_indicator()[5:])
+
+seasons_dict, seasons_list =  get_seasons_dict(1950, current_season)
 
 stats_dict = {'Players total stats': 'totals',
               'Players stats per game': 'per_game',
