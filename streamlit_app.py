@@ -7,7 +7,7 @@ st.subheader('Web App by [Pipe Galera](https://www.pipegalera.com/)')
 
 ########################### Lists and Dictionaries ###########################
 
-current_season = int(start_of_the_season_indicator()[5:])
+current_season = int(start_of_the_season_indicator()[5:])+1
 
 seasons_dict, seasons_list =  get_seasons_dict(1950, current_season)
 
