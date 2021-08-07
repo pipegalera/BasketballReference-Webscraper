@@ -135,6 +135,22 @@ def loading_teams_data(seasons_dict, selected_seasons):
 
     return df
 
+def current_free_agency_indicator():
+    """
+    There is no way to predict exactly when the Free Agency starts, and therefore
+    when the Hoopshype change the structure of the website. I asumme that by August
+    FA has already started and therefore website is been updated. 
+
+    If before August:
+        salaries current ended season
+    If August:
+        salaries next starting season
+    """
+    if date.today().month < 8:
+        return (str(date.today().year - 1) + str("-") + str(date.today().year))
+    else:
+        return (str(date.today().year) + str("-") + str(date.today().year + 1))
+
 def nba_salaries(seasons_dict, selected_seasons):
     # Store the key of the selected seasons
     keys_seasons = []
@@ -144,7 +160,7 @@ def nba_salaries(seasons_dict, selected_seasons):
     # List of URLs
     list_urls = []
     for season in selected_seasons:
-        if season == '2020-2021':
+        if season == current_free_agency_indicator():
             url = 'https://hoopshype.com/salaries/players/'
             list_urls.append(url)
         else:
@@ -157,12 +173,14 @@ def nba_salaries(seasons_dict, selected_seasons):
     # Salaries for 1990/1991 to 2019/2020 adjusted by inflation(*)
     for url in list_urls:
         if url == 'https://hoopshype.com/salaries/players/':
-            salary = pd.read_html(url, header = 0)[0].iloc[:,[1,2]]
+            salary = pd.read_html(url, header = 0)[0].iloc[:,1:3]
             # Add a column indicating the season of the salary
             salary["Season"] = salary.columns[1]
             # Rename the previous column name with just "Salary"
             salary.rename(columns={salary.columns[1]: "Salary"}, inplace = True)
+
             df = df.append(salary, ignore_index = True)
+
         else:
             salary = pd.read_html(url, header = 0)[0].iloc[:,1:]
             # Add a column indicating the season of the salary
