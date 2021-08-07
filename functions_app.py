@@ -129,9 +129,9 @@ def loading_teams_data(seasons_dict, selected_seasons):
         df = df.fillna(0)
         df = df.apply(pd.to_numeric, errors = 'ignore')
 
-    # Create a column with the full name of the team
-    team_name = df['Tm'].map(teams_dict)
-    df.insert(3, "Team", team_name)
+        # Create a column with the full name of the team
+        team_name = df['Tm'].map(teams_dict)
+        df.insert(3, "Team", team_name)
 
     return df
 
@@ -164,18 +164,20 @@ def nba_salaries(seasons_dict, selected_seasons):
             salary.rename(columns={salary.columns[1]: "Salary"}, inplace = True)
             df = df.append(salary, ignore_index = True)
         else:
-            salary = pd.read_html(url, header = 0)[0].iloc[:,1:4]
-            salary = (salary.set_index(["Player"])
-                            .stack()
-                            .reset_index()
-                            .rename(columns = {"level_1": "Season", 0: "Salary"}))
+            salary = pd.read_html(url, header = 0)[0].iloc[:,1:]
+            # Add a column indicating the season of the salary
+            salary["Season"] = salary.columns[1] 
+            # Rename the previous column name with just "Salary"
+            salary.rename(columns={salary.columns[1]: "Salary", 
+                                   salary.columns[2]: "Salary adjusted by inflation"}, 
+                          inplace = True)
+
             df = df.append(salary, ignore_index = True)
 
     # Tidy the dataset
     df = df.sort_values(by = ["Season", "Salary"], ascending = False)
-    df["Salary"] = df["Salary"].replace('[\$,]', '', regex=True).astype(int)
-    df["Season"] = df["Season"].replace('[(*)]', '', regex=True)
-
+    df["Salary"] = df["Salary"].apply(lambda x: x.replace("$", ""))
+    
     return df
 
 
