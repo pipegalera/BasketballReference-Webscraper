@@ -137,18 +137,14 @@ def loading_teams_data(seasons_dict, selected_seasons):
 
     return df
 
-def current_free_agency_indicator():
+def start_of_the_season_indicator():
     """
-    There is no way to predict exactly when the Free Agency starts, and therefore
-    when the Hoopshype change the structure of the website. I asumme that by August
-    FA has already started and therefore website is been updated. 
-
-    If before August:
+    If before Oct 19:
         salaries current ended season
     If August:
         salaries next starting season
     """
-    if date.today().month < 8:
+    if (date.today().month < 10) & (date.today().day < 10):
         return (str(date.today().year - 1) + str("-") + str(date.today().year))
     else:
         return (str(date.today().year) + str("-") + str(date.today().year + 1))
@@ -162,7 +158,7 @@ def nba_salaries(seasons_dict, selected_seasons):
     # List of URLs
     list_urls = []
     for season in selected_seasons:
-        if season == current_free_agency_indicator():
+        if season == start_of_the_season_indicator():
             url = 'https://hoopshype.com/salaries/players/'
             list_urls.append(url)
         else:
@@ -172,7 +168,7 @@ def nba_salaries(seasons_dict, selected_seasons):
     # Create a DataFrame that we will add the info in the url list by loop
     df = pd.DataFrame()
 
-    # Salaries for 1990/1991 to 2019/2020 adjusted by inflation(*)
+    # Salaries 
     for url in list_urls:
         if url == 'https://hoopshype.com/salaries/players/':
             salary = pd.read_html(url, header = 0)[0].iloc[:,1:3]
