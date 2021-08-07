@@ -1,5 +1,3 @@
-import streamlit as st
-import pandas as pd
 from functions_app import *
 
 st.markdown(" # :basketball: NBA Data Scraper :basketball:")
