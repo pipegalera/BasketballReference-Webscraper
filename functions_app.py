@@ -193,6 +193,7 @@ def nba_salaries(seasons_dict, selected_seasons):
     # Tidy the dataset
     df = df.sort_values(by = ["Season", "Salary"], ascending = False)
     df["Salary"] = df["Salary"].apply(lambda x: x.replace("$", ""))
+    df["Salary"] = df["Salary"].apply(pd.to_numeric, errors = 'ignore')
     
     return df
 
