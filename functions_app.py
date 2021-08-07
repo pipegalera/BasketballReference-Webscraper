@@ -2,6 +2,47 @@ import pandas as pd
 import base64
 from io import BytesIO
 
+teams_dict = {
+    'ATL': 'Atlanta Hawks',
+    'BOS': 'Boston Celtics',
+    'BRK': 'Brooklyn Nets',
+    'CHH': 'Charlotte Hornets',
+    'CHI': 'Chicago Bulls',
+    'CHO': 'Charlotte Bobcats',
+    'CHO': 'Charlotte Hornets',
+    'CLE': 'Cleveland Cavaliers',
+    'DAL': 'Dallas Mavericks',
+    'DEN': 'Denver Nuggets',
+    'DET': 'Detroit Pistons',
+    'GSW': 'Golden State Warriors',
+    'HOU': 'Houston Rockets',
+    'IND': 'Indiana Pacers',
+    'LAC': 'Los Angeles Clippers',
+    'LAL': 'Los Angeles Lakers',
+    'MEM': 'Memphis Grizzlies',
+    'MIA': 'Miami Heat',
+    'MIL': 'Milwaukee Bucks',
+    'MIN': 'Minnesota Timberwolves',
+    'NJN': 'New Jersey Nets',
+    'NOH': 'New Orleans Hornets',
+    'NOK': 'New Orleans/Oklahoma City Hornets',
+    'NOP': 'New Orleans Pelicans',
+    'NYK': 'New York Knicks',
+    'OKC': 'Oklahoma City Thunder',
+    'ORL': 'Orlando Magic',
+    'PHI': 'Philadelphia 76ers',
+    'PHO': 'Phoenix Suns',
+    'POR': 'Portland Trail Blazers',
+    'SAC': 'Sacramento Kings',
+    'SAS': 'San Antonio Spurs',
+    'SEA': 'Seattle Supersonics',
+    'TOR': 'Toronto Raptors',
+    'TOT': 'Combination of different team stats',
+    'UTA': 'Utah Jazz',
+    'VAN': 'Vancouver Grizzlies',
+    'WAS': 'Washington Wizards',
+    'WSB': 'Washington Bullets'} 
+
 def get_seasons_dict(from_season, to_season):
         seasons = {}
         list_years = list(reversed(range(from_season, to_season)))
@@ -47,9 +88,11 @@ def loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_st
     df = df.drop(columns = ['Rk'])
     df = df.dropna(how = 'all', axis = 'columns')
 
-    # Fill nans and turn data into numeric
+    # Tidy data
     df = df.fillna(0)
     df = df.apply(pd.to_numeric, errors = 'ignore')
+    df["Player"] = df["Player"].apply(lambda x: x.replace('*', ''))
+
 
     return df
 
@@ -82,9 +125,13 @@ def loading_teams_data(seasons_dict, selected_seasons):
         # Drop empty columns
         df = df.drop(columns = ['Rk'])
 
-        # Fill nans (Only ORtg or DRtg from 1983 on)
+        # Fill nans (eg. Only ORtg or DRtg from 1983 on)
         df = df.fillna(0)
         df = df.apply(pd.to_numeric, errors = 'ignore')
+
+    # Create a column with the full name of the team
+    team_name = df['Tm'].map(teams_dict)
+    df.insert(3, "Team", team_name)
 
     return df
 
