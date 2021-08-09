@@ -5,45 +5,74 @@ import streamlit as st
 from datetime import date
 
 teams_dict = {
+    'AND': 'Anderson Packers', 
     'ATL': 'Atlanta Hawks',
+    'BLB': 'Baltimore Bullets', 
     'BOS': 'Boston Celtics',
     'BRK': 'Brooklyn Nets',
-    'CHH': 'Charlotte Hornets',
+    'BUF': 'Buffalo Braves', 
+    'CAP': 'Capital Bullets' , 
+    'CHA': 'Charlotte Bobcats',
+    'CHH': 'Charlotte Hornets*',
     'CHI': 'Chicago Bulls',
-    'CHO': 'Charlotte Bobcats',
     'CHO': 'Charlotte Hornets',
+    'CHP': 'Chicago Packers', 
+    'CHS': 'Chicago Stags', 
+    'CHZ': 'Chicago Zephyrs', 
+    'CIN': 'Cincinnati Royals', 
     'CLE': 'Cleveland Cavaliers',
     'DAL': 'Dallas Mavericks',
     'DEN': 'Denver Nuggets',
     'DET': 'Detroit Pistons',
+    'FTW': 'Fort Wayne Pistons',
     'GSW': 'Golden State Warriors',
     'HOU': 'Houston Rockets',
     'IND': 'Indiana Pacers',
+    'INO': 'Indianapolis Olympians', 
+    'KCK': 'Kansas City Kings', 
+    'KCO': 'Kansas City-Omaha Kings', 
     'LAC': 'Los Angeles Clippers',
     'LAL': 'Los Angeles Lakers',
     'MEM': 'Memphis Grizzlies',
     'MIA': 'Miami Heat',
+    'MIH': 'Milwaukee Hawks', 
     'MIL': 'Milwaukee Bucks',
+    'MNL': 'Minneapolis Lakers', 
     'MIN': 'Minnesota Timberwolves',
     'NJN': 'New Jersey Nets',
     'NOH': 'New Orleans Hornets',
+    'NOJ': 'New Orleans Jazz', 
     'NOK': 'New Orleans/Oklahoma City Hornets',
     'NOP': 'New Orleans Pelicans',
     'NYK': 'New York Knicks',
+    'NYN': 'New York Nets', 
     'OKC': 'Oklahoma City Thunder',
     'ORL': 'Orlando Magic',
     'PHI': 'Philadelphia 76ers',
     'PHO': 'Phoenix Suns',
+    'PHW': 'Philadelphia Warriors',
     'POR': 'Portland Trail Blazers',
+    'ROC': 'Rochester Royals', 
     'SAC': 'Sacramento Kings',
     'SAS': 'San Antonio Spurs',
+    'SDC': 'San Diego Clippers', 
+    'SDR': 'San Diego Rockets', 
     'SEA': 'Seattle Supersonics',
+    'SFW': 'San Francisco Warriors',
+    'SHE': 'Sheboygan Red Skins', 
+    'SLH': 'St. Louis Hawks',
+    'STB': 'St. Louis Bombers', 
+    'SYR': 'Syracuse Nationals', 
     'TOR': 'Toronto Raptors',
     'TOT': 'Combination of different team stats',
+    'TRI': 'Tri-Cities Blackhawks', 
     'UTA': 'Utah Jazz',
     'VAN': 'Vancouver Grizzlies',
     'WAS': 'Washington Wizards',
-    'WSB': 'Washington Bullets'} 
+    'WAT': 'Waterloo Hawks', 
+    'WSB': 'Washington Bullets',
+    'WSC': 'Washington Capitols', 
+    } 
 
 teams_dict_inverted = dict(zip(teams_dict.values(), teams_dict.keys()))
 
@@ -71,6 +100,7 @@ def start_of_the_free_agency_indicator():
     else:
         return (str(date.today().year) + str("-") + str(date.today().year + 1))
 
+
 def get_seasons_dict(from_season, to_season):
         seasons = {}
         list_years = list(reversed(range(from_season, to_season)))
@@ -82,6 +112,7 @@ def get_seasons_dict(from_season, to_season):
 
         return seasons, seasons_list
 
+@st.cache(show_spinner=False)
 def loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_stats_type):
     # Store the key of the selected seasons
     keys_seasons = []
@@ -124,11 +155,12 @@ def loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_st
     team_full = df['Tm'].map(teams_dict)
     df.insert(3, "Team", team_full)
 
-    df = df.sort_values(by = ["Season"], ascending = False)
+    df = df.sort_values(by = ["Season", "Team"], ascending = False)
+    df = df.reset_index(drop = True)
 
     return df
 
-
+@st.cache(show_spinner=False)
 def loading_teams_data(seasons_dict, selected_seasons):
     # Store the key of the selected seasons
     keys_seasons = []
@@ -165,8 +197,12 @@ def loading_teams_data(seasons_dict, selected_seasons):
     team_abv = df['Team'].map(teams_dict_inverted)
     df.insert(1, "Tm", team_abv)
 
-    return df
+    df = df.sort_values(by = ["Season", "W/L%"], ascending = False)
+    df = df.reset_index(drop = True)
 
+    return df
+    
+@st.cache(show_spinner=False)
 def nba_salaries(seasons_dict, selected_seasons):
     # Store the key of the selected seasons
     keys_seasons = []
@@ -213,6 +249,7 @@ def nba_salaries(seasons_dict, selected_seasons):
     df = df.apply(pd.to_numeric, errors = 'ignore').fillna(0)
     df = df.sort_values(by = ["Season", "Salary"], ascending = False)
     
+    df = df.reset_index(drop = True)
     
     return df
 
