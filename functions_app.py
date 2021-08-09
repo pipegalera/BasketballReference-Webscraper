@@ -13,7 +13,7 @@ teams_dict = {
     'BUF': 'Buffalo Braves', 
     'CAP': 'Capital Bullets' , 
     'CHA': 'Charlotte Bobcats',
-    'CHH': 'Charlotte Hornets*',
+    'CHH': 'Charlotte Hornets',
     'CHI': 'Chicago Bulls',
     'CHO': 'Charlotte Hornets',
     'CHP': 'Chicago Packers', 
