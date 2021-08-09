@@ -28,13 +28,16 @@ with st.form('Form'):
 
 if submit:
     if selected_stats_type == 'Teams statistics': 
-        df = loading_teams_data(seasons_dict, selected_seasons)
+        with st.spinner('Loading...'):
+            df = loading_teams_data(seasons_dict, selected_seasons)
         df_header = 'Team stats for the ' + str(len(selected_seasons)) + ' selected seasons'
     elif selected_stats_type == 'Players salary (only available from 1990 on)': 
-        df = nba_salaries(seasons_dict, selected_seasons)
+        with st.spinner('Loading...'):
+            df = nba_salaries(seasons_dict, selected_seasons)
         df_header = 'Player stats for the ' + str(len(selected_seasons)) + ' selected seasons'
     else:
-        df = loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_stats_type)
+        with st.spinner('Loading...'):
+            df = loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_stats_type)
         df_header = 'Player stats for the ' + str(len(selected_seasons)) + ' selected seasons'
 
     st.subheader(df_header)
