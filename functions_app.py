@@ -57,7 +57,7 @@ teams_dict = {
     'SAS': 'San Antonio Spurs',
     'SDC': 'San Diego Clippers', 
     'SDR': 'San Diego Rockets', 
-    'SEA': 'Seattle Supersonics',
+    'SEA': 'Seattle SuperSonics',
     'SFW': 'San Francisco Warriors',
     'SHE': 'Sheboygan Red Skins', 
     'SLH': 'St. Louis Hawks',
