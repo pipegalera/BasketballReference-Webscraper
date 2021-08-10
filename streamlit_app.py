@@ -11,13 +11,6 @@ current_season = int(start_of_the_season_indicator()[5:])
 
 seasons_dict, seasons_list =  get_seasons_dict(1950, current_season+1)
 
-stats_dict = {'Players total stats': 'totals',
-              'Players stats per game': 'per_game',
-              'Players stats per 36 minutes': 'per_minute',
-              'Players stats per 100 possesions': 'per_poss',
-              'Players adavanced stats': 'advanced',
-              'Players salary (only available from 1990 on)': 'salaries',
-              'Teams statistics': 'teams'}
 
 ########################### Data Scraper ###############################
 

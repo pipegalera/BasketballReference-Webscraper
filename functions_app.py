@@ -2,18 +2,42 @@ import pandas as pd
 import base64
 from io import BytesIO
 import streamlit as st
-from datetime import date
-from teams_names import teams_dict
+from datetime import date, datetime
+import requests
 
+from teams_names import TEAMS
+
+stats_dict = {'Players total stats': 'totals',
+              'Players stats per game': 'per_game',
+              'Players stats per 36 minutes': 'per_minute',
+              'Players stats per 100 possesions': 'per_poss',
+              'Players adavanced stats': 'advanced',
+              'Players salary (only available from 1990 on)': 'salaries',
+              'Teams statistics': 'teams'}
+
+headers = {
+    'authority': 'scrapeme.live',
+    'dnt': '1',
+    'upgrade-insecure-requests': '1',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'sec-fetch-site': 'none',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-user': '?1',
+    'sec-fetch-dest': 'document',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+}
 
 def start_of_the_season_indicator():
     """
     If before Oct 19:
-         current ended season
+         stats current ended season
     If August:
-         next starting season
+         stats next starting season
     """
-    if (date.today().month < 10) & (date.today().day < 10):
+    present = datetime.now()
+    start_regular_season = datetime(present.year, 10, 19)
+    if present < start_regular_season:
         return (str(date.today().year - 1) + str("-") + str(date.today().year))
     else:
         return (str(date.today().year) + str("-") + str(date.today().year + 1))
@@ -25,7 +49,9 @@ def start_of_the_free_agency_indicator():
     If August 4th on:
          salaries next starting season
     """
-    if (date.today().month < 8) & (date.today().day < 4):
+    present = datetime.now()
+    start_fa = datetime(present.year, 8, 4)
+    if present < start_fa:
         return (str(date.today().year - 1) + str("-") + str(date.today().year))
     else:
         return (str(date.today().year) + str("-") + str(date.today().year + 1))
@@ -58,11 +84,13 @@ def loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_st
         url = "https://www.basketball-reference.com/leagues/NBA_{season}_{type}.html".format(season=season, type=key_stats_type)
         url_list.append(url)
 
-
     # Screape data
     df = pd.DataFrame()
     for url in url_list:
-        part_df = pd.read_html(url, header = 0)[0]
+        # Create User Agent
+        url_agent = requests.get(url, headers=headers).text
+        # Store website data it a DataFrame
+        part_df = pd.read_html(url_agent, header = 0)[0]
 
         # Indicate year
         season = [d for d in url if d.isdigit()]
@@ -80,15 +108,16 @@ def loading_players_data(seasons_dict, stats_dict, selected_seasons, selected_st
     # Tidy data
     df = df.apply(pd.to_numeric, errors = 'ignore').fillna(0)
     df["Player"] = df["Player"].apply(lambda x: x.replace('*', ''))
-    
+
     # Create a column with the full name of the team
-    team_full = df['Tm'].map(teams_dict)
+    team_full = df['Tm'].map(TEAMS)
     df.insert(3, "Team", team_full)
 
     df = df.sort_values(by = ["Season", "Team"], ascending = False)
     df = df.reset_index(drop = True)
 
     return df
+
 
 @st.cache(show_spinner=False)
 def loading_teams_data(seasons_dict, selected_seasons):
@@ -106,7 +135,10 @@ def loading_teams_data(seasons_dict, selected_seasons):
     # Screape data
     df = pd.DataFrame()
     for url in url_list:
-        part_df = pd.read_html(url, header = 1)[0]
+        # Create User Agent
+        url_agent = requests.get(url, headers=headers).text
+        # Store website data it a DataFrame
+        part_df = pd.read_html(url_agent, header = 1)[0]
 
         # Indicate year
         season = [d for d in url if d.isdigit()]
@@ -124,8 +156,8 @@ def loading_teams_data(seasons_dict, selected_seasons):
     df = df.apply(pd.to_numeric, errors = 'ignore')
 
     # Create a column with the abbreviation name of the team
-    teams_dict_inverted = dict(zip(teams_dict.values(), teams_dict.keys()))
-    team_abv = df['Team'].map(teams_dict_inverted)
+    TEAMS_inverted = dict(zip(TEAMS.values(), TEAMS.keys()))
+    team_abv = df['Team'].map(TEAMS_inverted)
     df.insert(1, "Tm", team_abv)
 
     df = df.sort_values(by = ["Season", "W/L%"], ascending = False)
